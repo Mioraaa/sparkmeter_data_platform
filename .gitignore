@@ -1,2 +1,2 @@
-env
-dags/sparmeter_dbt/env
+.env
+dags/sparmeter_dbt/.env
