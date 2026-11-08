@@ -1,0 +1,2 @@
+dbt-snowflake==1.9.2
+dbt-rpc==0.1.1
