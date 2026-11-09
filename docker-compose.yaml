@@ -50,10 +50,7 @@ x-airflow-common:
   # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
   image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:3.4.0}
-  build:
-    context: .
-    dockerfile: Dockerfile
-
+  build: .
   env_file:
     - ${ENV_FILE_PATH:-.env}
   environment:
@@ -81,7 +78,6 @@ x-airflow-common:
     AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
-    - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags/sparkmeter_dbt
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
@@ -336,14 +332,6 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-  dbt:
-    build:
-      context: ./sparkmeter_dbt
-      dockerfile: ./sparkmeter_dbt/Dockerfile
-    image: sparkmeter-dbt:1.0
-    profiles:
-      - tools
-    command: ["dbt", "--version"]
 volumes:
   postgres-db-volume:
 
