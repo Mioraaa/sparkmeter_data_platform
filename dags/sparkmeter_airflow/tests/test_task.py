@@ -2,6 +2,7 @@
 
 import sys
 import os
+import json
 
 import pytest
 
@@ -36,3 +37,17 @@ class TestTask:
                 "site": "client 3 site"
             }
         ]
+
+    def test_save_customers(self, customers):
+        customer_ops = CustomerOperations()
+        customer_file = "/media/miora/DONNEES1/project/sparkmeter_data_pipeline/sparkmeter_data_platform/dags/sparkmeter_airflow/data/customers/all_customers.json"
+        customer_ops.all_customers =  customers
+        customer_ops.org_id = "ORG_123"
+
+        customer_ops.save_customers(customers)
+
+        with open(customer_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        assert data[0] == customers[0]
+        assert data[1] == customers[1]
