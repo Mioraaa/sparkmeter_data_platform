@@ -3,10 +3,11 @@
 import sys
 import os
 import requests
+import json
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.abspath(__file__ + "/../../../"))
 from sparkmeter_airflow.utils.config_manager import ConfigManager
-from sparkmeter_airflow.utils.log_manager import get_logger
+from sparkmeter_airflow.utils.log_manager import setup_logging
 
 
 class CustomerOperations:
@@ -17,11 +18,13 @@ class CustomerOperations:
         self.org_id = self.conf.read_config("config_file", section="session")["org_id"]
         self.url = self.conf.read_config("config_file", section="session")["url"]
         self.k_session = self.conf.read_config("config_file", section="session")["ksession"]
-        
+        self.referer = self.conf.read_config("config_file", section="session")["referer"]
+        self.all_customers = self.conf.read_config("config_file", section="data")["customer_list"]
+
     def get_customers(self, page_number) -> bool:
         is_success = True
         try:
-            get_logger().info(
+            setup_logging().info(
                 "Start to fetch customers from Sprkmeter"
             )
             
@@ -31,7 +34,7 @@ class CustomerOperations:
             headers = {
                 "User-Agent": "Mozilla/5.0",
                 "Accept": "application/json, text/plain, */*",
-                "Referer": f"{self.url}/portfolio/{self.org_id}/",
+                "Referer": self.referer,
                 "Origin": self.org_id
             }
             self.session.headers.update(headers)
@@ -55,11 +58,34 @@ class CustomerOperations:
             
             if customers is None:
                 raise Exception(
-                    f"Invalid customer key. Rceived key is: {list(data.keys())}"
+                    f"Invalid customer key. Received key is: {list(data.keys())}"
                 )
 
         except Exception as e:
-            get_logger().error(f"Error occurred while fetching customers: {e}")
+            setup_logging().error(f"Error occurred while fetching customers: {e}")
             is_success = False
 
         return is_success
+
+    def save_customers(self, customers):
+        temporary_file = self.all_customers
+
+        try:
+            setup_logging().info(
+                "Start to save all customers to temporary file"
+            )
+            with open(temporary_file, "w") as f:
+                json.dump(
+                    {
+                        "organization_id": self.org_id,
+                        "total_customers": len(customers),
+                        "customers": customers
+                    },
+                    f,
+                    ensure_ascii=False,
+                    indent=2
+                )
+        except Exception as e:
+            setup_logging().error(
+                f"An error occurred while saving all customers to temporary file {e}"
+            )
