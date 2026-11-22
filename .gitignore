@@ -1,3 +1,13 @@
 .env
+.idea
 dags/sparmeter_airflow/config/conf.cfg
+dags/sparkmeter_airflow/__init__.py
+dags/sparkmeter_airflow/__pycache__/
+dags/sparkmeter_airflow/tasks/__init__.py
+dags/sparkmeter_airflow/tasks/__pycache__/
+dags/sparkmeter_airflow/tests/__pycache__/
+dags/sparkmeter_airflow/utils/__init__.py
+dags/sparkmeter_airflow/utils/__pycache__/
 dags/sparmeter_dbt/.env
+.pytest_cache/
+tests/__pycache__/
