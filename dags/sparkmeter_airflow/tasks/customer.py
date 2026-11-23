@@ -22,9 +22,8 @@ class CustomerOperations:
         self.all_customers = self.conf.read_config("config_file", section="data")["customer_list"]
 
     def get_customers(self, page_number):
-        # try:
         setup_logging().info(
-            "Start to fetch customers from Sprkmeter"
+            "Start to fetch customers from Sparkmeter"
         )
 
         cookies = {
@@ -156,5 +155,5 @@ class CustomerOperations:
             )
 
         setup_logging().info(
-            "All customers saved successfully"
+            "All customers are saved successfully"
         )
