@@ -38,3 +38,23 @@ class ConsumptionOperations:
                 z.extractall(tmp_dir)
 
         return tmp_dir
+
+
+    def find_all_csv(self, root):
+
+        csv_files = []
+
+        for path, _, files in os.walk(root):
+
+            for file in files:
+
+                if file.lower().endswith(".csv"):
+                    csv_files.append(
+                        Path(path) / file
+                    )
+
+        setup_logging().info(
+            f"{len(csv_files)} CSV found"
+        )
+
+        return csv_files
