@@ -7,17 +7,19 @@ import os
 from pathlib import Path
 
 sys.path.append(os.path.abspath(__file__ + "/../../../"))
+from sparkmeter_airflow.utils.config_manager import ConfigManager
 from sparkmeter_airflow.utils.log_manager import setup_logging
 
 class ConsumptionOperations:
     def __init__(self):
-        pass
+        self.conf = ConfigManager()
+        self.received_dir = self.conf.read_config("config_file", section="consumption")["received_dir"]
 
-    def extract_all_zip_files(received_dir="ReceivedFiles"):
+    def extract_all_zip_files(self):
 
-        tmp_dir = Path(tempfile.mkdtemp(prefix="sparkmeter_local_"))
-
-        zip_files = list(Path(received_dir).glob("*.zip"))
+        tmp_dir = Path(self.received_dir + tempfile.mkdtemp(prefix="sparkmeter_local_"))
+        data = self.received_dir + "ReceivedFiles"
+        zip_files = list(Path(data).glob("*.zip"))
 
         if not zip_files:
             setup_logging().info(
