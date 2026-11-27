@@ -4,6 +4,7 @@ import sys
 import os
 import requests
 import json
+import pandas as pd
 
 sys.path.append(os.path.abspath(__file__ + "/../../../"))
 from sparkmeter_airflow.utils.config_manager import ConfigManager
@@ -157,3 +158,85 @@ class CustomerOperations:
         setup_logging().info(
             "All customers are saved successfully"
         )
+
+    def load_customer(self):
+
+        setup_logging().info(
+            "Start to load all SparkMerter client"
+        )
+
+        all_customers = self.all_customers
+        frames = []
+
+        try:
+            with open(all_customers, "r", encoding="utf-8") as f:
+
+                data = json.load(f)
+
+            customers = data.get("customers", [])
+
+            for customer in customers:
+
+                customer_name = customer.get("name")
+
+                meters = customer.get("meters", [])
+
+                for meter in meters:
+
+                    serial = meter.get("serial")
+
+                    if not serial:
+                        continue
+
+                    frames.append({
+                        "serial": serial,
+                        "customer_name": customer_name
+                    })
+
+            df = pd.DataFrame(frames, columns=["serial", "customer_name"])
+
+            if df.empty:
+                setup_logging().warning(
+                    "Clients counter empty"
+                )
+                return df
+
+            df["serial"] = (
+                df["serial"]
+                .astype(str)
+                .str.upper()
+                .str.strip()
+            )
+
+            df = df[
+                df["serial"].notna() &
+                (df["serial"] != "")
+                ]
+
+            df = df.drop_duplicates(
+                subset=["serial"]
+            ).reset_index(drop=True)
+
+            setup_logging().info(
+                f"{len(df)} counter found"
+            )
+
+            return df
+
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+
+            setup_logging().error(
+                f"Unable to load customer reference: {e}"
+            )
+
+            raise
+
+        except Exception as e:
+
+            setup_logging().exception(
+                f"Unexpected error while loading customers: {e}"
+            )
+
+            raise
+
+
