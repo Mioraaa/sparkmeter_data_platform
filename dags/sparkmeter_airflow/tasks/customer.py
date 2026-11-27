@@ -162,7 +162,7 @@ class CustomerOperations:
     def load_customer(self):
 
         setup_logging().info(
-            "Start to load all SparkMerter client"
+            "Start to load all SparkMeter client"
         )
 
         all_customers = self.all_customers
