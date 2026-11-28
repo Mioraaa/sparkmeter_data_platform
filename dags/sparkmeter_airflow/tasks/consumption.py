@@ -6,11 +6,14 @@ import sys
 import os
 from pathlib import Path
 
+import pandas as pd
+
 sys.path.append(os.path.abspath(__file__ + "/../../../"))
 from sparkmeter_airflow.utils.config_manager import ConfigManager
 from sparkmeter_airflow.utils.log_manager import setup_logging
 
 class ConsumptionOperations:
+
     def __init__(self):
         self.conf = ConfigManager()
         self.received_dir = self.conf.read_config("config_file", section="consumption")["received_dir"]
@@ -68,3 +71,14 @@ class ConsumptionOperations:
         )
 
         return csv_files
+
+    def get_periode(self, hour):
+        if pd.isna(hour):
+            return "Unknown"
+        elif 6 <= hour <= 17:
+            return "jour"
+        elif 18 <= hour <= 20:
+            return "base"
+        else:
+            return "nuit"
+
