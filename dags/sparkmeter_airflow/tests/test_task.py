@@ -2,7 +2,7 @@ import sys
 import os
 import json
 import zipfile
-
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -209,6 +209,53 @@ class TestCustomer:
         assert data["customers"] == customers
 
 
+    @pytest.fixture
+    def customer_operations(self, tmp_path, monkeypatch):
+
+        customers_file = tmp_path / "all_customers.json"
+
+        customer = CustomerOperations.__new__(CustomerOperations)
+        customer.all_customers = str(customers_file)
+
+        monkeypatch.setattr(
+            "sparkmeter_airflow.tasks.customer.setup_logging",
+            lambda: MagicMock()
+        )
+
+        return customer, customers_file
+
+    def test_load_customer(self, customer_operations):
+        customer, customers_file = customer_operations
+        data = {
+            "customers": [
+                {
+                    "name": "Customer A",
+                    "meters": [
+                        {"serial": "meter001"},
+                        {"serial": "METER001"}
+                    ]
+                },
+                {
+                    "name": "Customer B",
+                    "meters": [
+                        {"serial": "meter002"}
+                    ]
+                }
+            ]
+        }
+
+        customers_file.write_text(
+            json.dumps(data),
+            encoding="utf-8"
+        )
+
+        df = customer.load_customer()
+
+        assert len(df) == 2
+        assert df["serial"].tolist() == [
+            "METER001",
+            "METER002"
+        ]
 
 
 class TestConsumption:
